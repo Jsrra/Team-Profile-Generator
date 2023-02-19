@@ -120,22 +120,16 @@ function addEmployee() {
                 inquirer.prompt(internQuestion)
                     .then((internResponse) => {
                         let intern = []
-                        intern.push(Response, internResponse)
                         if (Response.id === `Yes`) {
-                            let newId = uuid.v4()
+                            let newId = uuidv4()
                             intern.push(newId)
                         }
+                        intern.push(Response, internResponse)
+
                         console.log(intern);
                     })
             }
-        }
-
-        )
-    if (Response.id === `Yes`) {
-        let newID = uuid.v4()
-
-
-    }
+        })
 }
 
 addEmployee();
