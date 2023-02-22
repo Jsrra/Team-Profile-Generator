@@ -5,23 +5,34 @@ const { type } = require("os")
 const { v4: uuidv4 } = require('uuid');
 
 class Employee {
-    constructor(name, id, email) {
-        this.name = name
+    constructor(named, id, email) {
+        this.named = named
         this.id = id
         this.email = email
     }
 
     getName() {
-
+        inquirer.prompt(questions[0])
+        .then((Response)=> {
+            let named = Response.named
+            console.log(named);
+        })
     }
-    getId() {
-
+    getId(id) {
+        inquirer.prompt(questions[1])
+        .then((Response)=> {
+        })
     }
-    getEmail() {
-
+    getEmail(email) {
+        inquirer.prompt(questions[2])
     }
     getRole() {
-
+        inquirer.prompt(questions[3])
+        .then((Response)=> {
+            if(Response.role === `Manager`){
+                inquirer.prompt(managerQuestion)
+            }
+        })
     }
 }
 
@@ -56,6 +67,11 @@ class Intern extends Employee {
 
     }
 }
+
+const manager = new Manager(name, id, email, role, officeNumber)
+const engineer = new Engineer(name, id, email, role, gitHub)
+const intern = new Intern(name, id, email, role, school)
+Employee.getrole()
 
 const questions = [{
     type: `input`,
@@ -98,42 +114,57 @@ const internQuestion = [{
     message: `What school do you attend?`
 }]
 
-function addEmployee() {
-    inquirer.prompt(questions)
-        .then((Response) => {
-            // console.log(Response);
-            if (Response.role === `Manager`) {
-                inquirer.prompt(managerQuestion)
-                    .then((managerResponse) => {
-                        let manager = []
-                        manager.push(Response, managerResponse)
-                        console.log(manager);
-                    })
-            } else if (Response.role === `Engineer`) {
-                inquirer.prompt(engineerQuestion)
-                    .then((engineerResponse) => {
-                        let engineer = []
-                        engineer.push(Response, engineerResponse)
-                        console.log(engineerResponse);
-                    })
-            } else if (Response.role === `Intern`) {
-                inquirer.prompt(internQuestion)
-                    .then((internResponse) => {
-                        let intern = []
-                        if (Response.id === `Yes`) {
-                            let newId = uuidv4()
-                            intern.push(newId)
-                        }
-                        intern.push(Response, internResponse)
+// function addEmployee() {
+//     inquirer.prompt(questions)
+//         .then((Response) => {
+//             // console.log(Response);
+//             if (Response.role === `Manager`) {
+//                 inquirer.prompt(managerQuestion)
+//                     .then((managerResponse) => {
+//                         let manager = []
+//                         if (Response.id === `Yes`) {
+//                             let newId = uuidv4()
+//                             manager.push(newId)
+//                         }
+//                         manager.push(Response, managerResponse)
+//                         console.log(manager);
+//                     })
+//             } else if (Response.role === `Engineer`) {
+//                 inquirer.prompt(engineerQuestion)
+//                     .then((engineerResponse) => {
+//                         let engineer = []
+//                         if (Response.id === `Yes`) {
+//                             let newId = uuidv4()
+//                             engineer.push(newId)
+//                         }
+//                         engineer.push(Response, engineerResponse)
+//                         console.log(engineer);
+//                     })
+//             } else if (Response.role === `Intern`) {
+//                 inquirer.prompt(internQuestion)
+//                     .then((internResponse) => {
+//                         let intern = []
+//                         if (Response.id === `Yes`) {
+//                             let newId = uuidv4()
+//                             intern.push(newId)
+//                         }
+//                         intern.push(Response, internResponse)
 
-                        console.log(intern);
-                    })
-            }
-        })
-}
+//                         console.log(intern);
+//                     })
+//             }
+//         })
+// }
 
-addEmployee();
+// addEmployee();
 
+Employee.getName()
+Employee.getId()
+Employee.getEmail()
+Employee.getRole()
 
+// const manager = new Manager(name, id, email)
+// const engineer = new Engineer(name, id, email)
+// const intern = new Intern(name, id, email)
 
 
