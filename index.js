@@ -1,170 +1,232 @@
 const fs = require(`fs`)
-const { ServerResponse } = require("http")
 const inquirer = require(`inquirer`)
-const { type } = require("os")
-const { v4: uuidv4 } = require('uuid');
+const team = [];
+const Manager = require(`./lib/manager`)
+const Engineer = require(`./lib/engineer`)
+const Intern = require(`./lib/intern`);
+const Employee = require("./lib/employee");
 
-class Employee {
-    constructor(named, id, email) {
-        this.named = named
-        this.id = id
-        this.email = email
-    }
+// const questions = [{
+//     type: `input`,
+//     name: `name`,
+//     message: `What is your name?`
+// },
+// {
+//     type: `input`,
+//     name: `id`,
+//     message: `id?`,
+// },
+// {
+//     type: `input`,
+//     name: `email`,
+//     message: `What is your email?`
+// },
+// {
+//     type: `list`,
+//     name: `role`,
+//     message: `What is your role?`,
+//     choices: [`Manager`, `Engineer`, `Intern`]
+// },
+// {
+//     type: `input`,
+//     name: `officeNumber`,
+//     message: `What is your office number?`,
+//     when: (Response.role === `Manager`)
+// },
+// {
+//     type: `input`,
+//     name: `gitHub`,
+//     message: `What is your GitHub username?`,
+//     when: (Response.role === `Engineer`)
+// },
+// {
+//     type: `input`,
+//     name: `school`,
+//     message: `What school do you attend?`,
+//     when: (Response.role === `Intern`)
+// }
+// ]
 
-    getName() {
-        inquirer.prompt(questions[0])
-        .then((Response)=> {
-            let named = Response.named
-            console.log(named);
-        })
-    }
-    getId(id) {
-        inquirer.prompt(questions[1])
-        .then((Response)=> {
-        })
-    }
-    getEmail(email) {
-        inquirer.prompt(questions[2])
-    }
-    getRole() {
-        inquirer.prompt(questions[3])
-        .then((Response)=> {
-            if(Response.role === `Manager`){
-                inquirer.prompt(managerQuestion)
+function init() {
+    console.log("Welcome to Team Generator!!!");
+    console.log("\n")
+
+
+    addManager()
+}
+init();
+
+function addManager() {
+    inquirer.prompt([{
+        type: `input`,
+        name: `name`,
+        message: `What is your name?`
+    },
+    {
+        type: `input`,
+        name: `id`,
+        message: `id?`,
+    },
+    {
+        type: `input`,
+        name: `email`,
+        message: `What is your email?`
+    },
+    {
+        type: `input`,
+        name: `officeNumber`,
+        message: `What is your office number?`
+    },]).then(function (answers) {
+        const manager = new Manager(answers.name, answers.id, answers.email, answers.officeNumber);
+        team.push(manager);
+        addEmployee();
+    })
+}
+
+
+function addEmployee() {
+    inquirer.prompt([{
+        type: `list`,
+        name: `role`,
+        message: `Select a role.`,
+        choices: [`Engineer`, `Intern`, `Quit and Create`],
+    }])
+        .then(function (answers) {
+            switch (answers.role) {
+                case `Engineer`:
+                    addEngineer()
+                    break;
+                case `Intern`:
+                    addIntern()
+                    break;
+                default:
+                    const html = generateHtml()
+                    fs.writeFileSync(`dist/index.html`, html, (err) => {
+                        if (!err) { console.log(`Success!`); } else { console.log(`Error.`, err); }
+                    })
+                    break;
             }
         })
-    }
 }
 
-class Manager extends Employee {
-    constructor(officeNumber) {
-        this.officeNumber = officeNumber
-    }
-
-    getRole() {
-
-    }
+function addEngineer() {
+    inquirer.prompt([{
+        type: `input`,
+        name: `name`,
+        message: `What is your name?`
+    },
+    {
+        type: `input`,
+        name: `id`,
+        message: `id?`,
+    },
+    {
+        type: `input`,
+        name: `email`,
+        message: `What is your email?`
+    },
+    {
+        type: `input`,
+        name: `github`,
+        message: `What is your Github username?`
+    },]).then(function (answers) {
+        const engineer = new Engineer(answers.name, answers.id, answers.email, answers.github);
+        team.push(engineer);
+        addEmployee();
+    })
 }
-class Engineer extends Employee {
-    constructor(gitHub) {
-        this.gitHub = gitHub
-    }
-
-    getGitHub() {
-        console.log(`${this.gitHub}`);
-    }
-
-    getRole() {
-
-    }
+function addIntern() {
+    inquirer.prompt([{
+        type: `input`,
+        name: `name`,
+        message: `What is your name?`
+    },
+    {
+        type: `input`,
+        name: `id`,
+        message: `id?`,
+    },
+    {
+        type: `input`,
+        name: `email`,
+        message: `What is your email?`
+    },
+    {
+        type: `input`,
+        name: `school`,
+        message: `What school do you attend?`
+    },]).then(function (answers) {
+        const intern = new Intern(answers.name, answers.id, answers.email, answers.school);
+        team.push(intern);
+        addEmployee();
+    })
 }
-class Intern extends Employee {
-    constructor(school) {
-        this.school = school
-    }
 
-    getRole() {
+function generateHtml() {
 
-    }
+    const employeeHtml = team.map(employee => {
+        let holder = ``;
+        let hold;
+        if (employee.getRole() === "Manager") {
+            // holder = employee.officeNumber;
+            // hold = 'Office Number'
+            holder = `<li class="list-group-item"> Office Number: <span>${employee.getOfficeNumber()}</span></li>`
+        } else if (employee.getRole() === "Engineer") {
+            // holder = employee.getGitHub();
+            // hold = 'GitHub'
+            holder = `<li class="list-group-item">Github: <a href="https://github.com/${employee.getGitHub()}">${employee.getGitHub()}</a></li>`
+        } else if (employee.getRole() === "Intern") {
+            // holder = employee.school;
+            // hold = 'School'
+            holder = `<li class="list-group-item"> School: <span>${employee.getSchool()}</span></li>`
+        }
+
+        return `<div class="card text-bg-primary mb-3 mx-3" style="max-width: 18rem;">
+                <div class="card-header">${employee.name}<h5>${employee.getRole()}</h5><i class="bi bi-cup-hot-fill"></i></div>
+
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item">ID: <span>${employee.id}</span></li>
+                        <li class="list-group-item">Email: <span><a href="mailto:${employee.email}">${employee.email}</a></span></li>
+                        ${holder}
+                    </ul>
+                </div>`
+    })
+
+    const template = `
+        <!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
+    <title>Document</title>
+</head>
+
+<body>
+    <div class="d-flex bg-primary justify-content-center flex-column text-center m-3" style="height:25vh">
+        <h1>My Team</h1>
+    </div>
+
+    <div class="d-flex justify-content-center">
+
+        <div class="d-flex mx-3">
+
+            <div class="d-flex">
+            ${employeeHtml.join("")}
+            </div>
+
+        </div>
+    </div>
+</body>
+
+</html>`
+
+    console.log(template);
+    return template;
 }
-
-const manager = new Manager(name, id, email, role, officeNumber)
-const engineer = new Engineer(name, id, email, role, gitHub)
-const intern = new Intern(name, id, email, role, school)
-Employee.getrole()
-
-const questions = [{
-    type: `input`,
-    name: `name`,
-    message: `What is your name?`
-},
-{
-    type: `list`,
-    name: `id`,
-    message: `id?`,
-    choices: [`Yes`, `No`]
-},
-{
-    type: `input`,
-    name: `email`,
-    message: `What is your email?`
-},
-{
-    type: `list`,
-    name: `role`,
-    message: `What is your role?`,
-    choices: [`Manager`, `Engineer`, `Intern`]
-}]
-
-const managerQuestion = [{
-    type: `input`,
-    name: `officeNumber`,
-    message: `What is your office number?`
-}]
-
-const engineerQuestion = [{
-    type: `input`,
-    name: `gitHub`,
-    message: `What is your GitHub username?`
-}]
-
-const internQuestion = [{
-    type: `input`,
-    name: `school`,
-    message: `What school do you attend?`
-}]
-
-// function addEmployee() {
-//     inquirer.prompt(questions)
-//         .then((Response) => {
-//             // console.log(Response);
-//             if (Response.role === `Manager`) {
-//                 inquirer.prompt(managerQuestion)
-//                     .then((managerResponse) => {
-//                         let manager = []
-//                         if (Response.id === `Yes`) {
-//                             let newId = uuidv4()
-//                             manager.push(newId)
-//                         }
-//                         manager.push(Response, managerResponse)
-//                         console.log(manager);
-//                     })
-//             } else if (Response.role === `Engineer`) {
-//                 inquirer.prompt(engineerQuestion)
-//                     .then((engineerResponse) => {
-//                         let engineer = []
-//                         if (Response.id === `Yes`) {
-//                             let newId = uuidv4()
-//                             engineer.push(newId)
-//                         }
-//                         engineer.push(Response, engineerResponse)
-//                         console.log(engineer);
-//                     })
-//             } else if (Response.role === `Intern`) {
-//                 inquirer.prompt(internQuestion)
-//                     .then((internResponse) => {
-//                         let intern = []
-//                         if (Response.id === `Yes`) {
-//                             let newId = uuidv4()
-//                             intern.push(newId)
-//                         }
-//                         intern.push(Response, internResponse)
-
-//                         console.log(intern);
-//                     })
-//             }
-//         })
-// }
-
-// addEmployee();
-
-Employee.getName()
-Employee.getId()
-Employee.getEmail()
-Employee.getRole()
-
-// const manager = new Manager(name, id, email)
-// const engineer = new Engineer(name, id, email)
-// const intern = new Intern(name, id, email)
-
 
